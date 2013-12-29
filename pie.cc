@@ -65,7 +65,7 @@ static int fname2buf(FILE *fp,long *blen, unsigned char **buf)
  * @param ilen is the input length
  * @param ibuf is the input buffer
  * @param olen is the output length (in/out)
- * @param obuf is the output buffer (allocated by calle)
+ * @param obuf is the output buffer (allocated by caller)
  * @return zero on success, non-zero for error
  *
  */
@@ -128,12 +128,6 @@ main(int argc, char *argv[])
 	rv=hashbuf(blen,buf,&hlen,hbuf);
 	if (rv!=0) { printf("Can't hash file: %s\n",fname); exit(-5);}
 
-	for (int i=0;i!=hlen;i++) {
-		if (i && !(i%4)) { printf(" ");}
-		printf("%02x",hbuf[i]);
-	}
-	printf("\n");
-
 	// now pick N randoms less than 8*hlen
 	unsigned char rndarr[N];
 	rv=RAND_bytes(rndarr,N);
@@ -155,7 +149,8 @@ main(int argc, char *argv[])
 		}
 	}
 	// one more inner for the last few bits
-		for (int j=0;j!=N%8;j++) {
+	int bitsleft=(N%8?(N%8):8);
+		for (int j=0;j!=bitsleft;j++) {
 			int rndbit=rndarr[8*(bal-1)+j];
 			unsigned char rndch=hbuf[rndbit/8];
 			unsigned char thebit=rndch&(8>>(rndbit%8));
@@ -163,22 +158,65 @@ main(int argc, char *argv[])
 				bitsarr[(bal-1)] |= (0x80>>j);
 			}
 		}
-	
-	// binary
-	printf("%d",N);
+
+
+	printf("Debug stuff\n");
+
+	printf("Hash(PIE-crust)\n");
+	for (int i=0;i!=hlen;i++) {
+		if (i && !(i%4)) { printf(" ");}
+		printf("%02x",hbuf[i]);
+	}
 	printf("\n");
+
+	printf("Hash(PIE-crust, no spaces)\n");
+	for (int i=0;i!=hlen;i++) {
+		printf("%02x",hbuf[i]);
+	}
+	printf("\n");
+
+	// binary
+	printf("N=%d",N);
+	printf("\nrands(hex):");
 	for (int i=0;i!=N;i++){
 		printf("%02x",rndarr[i]);
 	}
-	printf("\n");
+	printf("\nrands(decimal):");
 	for (int i=0;i!=N;i++){
 		printf("%d,",rndarr[i]);
 	}
-	printf("\n");
+	printf("\nrandom bits:");
 	for (int i=0;i!=bal;i++) {
 		printf("%02x",bitsarr[i]);
 	}
 	printf("\n");
+
+	// ASCII
+	printf("ASCII version\n");
+	long ahr_len=2*N;
+	unsigned char ah_rnds[ahr_len+1];
+	memset(ah_rnds,0,ahr_len+1);
+	rv=b16_enc(N,rndarr,&ahr_len,ah_rnds);
+	if (rv!=0) { printf("Can't AH encode file: %s\n",fname); exit(-7);}
+	long ahb_len=2*bal;
+	unsigned char ah_bits[ahb_len+1];
+	memset(ah_bits,0,ahb_len+1);
+	rv=b16_enc(bal,bitsarr,&ahb_len,ah_bits);
+	if (rv!=0) { printf("Can't AH encode file: %s\n",fname); exit(-7);}
+	printf(":%d:%s:%s\n",N,ah_rnds,ah_bits);
+
+	// Binary
+	printf("Binary version\n");
+	printf("%02x",N);
+	for (int i=0;i!=N;i++){
+		printf("%02x",rndarr[i]);
+	}
+	for (int i=0;i!=bal;i++) {
+		printf("%02x",bitsarr[i]);
+	}
+	printf("\n");
+
+
 	return(0);
 }
 

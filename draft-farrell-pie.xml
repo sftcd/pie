@@ -224,7 +224,6 @@ added to the right. Those padding bits SHOULD be random.
 </t>
 
       <figure align="center" title="PIE Binary Format" anchor="fig_bin">
-
         <artwork align="left"><![CDATA[
 0123456701234567012345670123456701234567012345670123456701234567
 +--+----+--------------------...+---------------------------...+
@@ -261,20 +260,33 @@ Those padding bits SHOULD be random.
 
 <t>In this section we re-use the example values from Section 8.2 of
 <xref target="RFC6920"/>, so we are using SHA-256 with the PIE-crust
-being the subject public key information used in that example.</t>
+being the subject public key information used in that example.
+<xref target="fig_egs"/> shows both ASCII and Binary format PIEs 
+for this PIE-crust with 24 indices used.</t>
 
-<t>The number of indices required
-to efficiently determine the right key to use to verify a signature
-will depend on the size of the verifier
-database, i.e., the number of possible signers. With 20 indices 
-and a large verifier database of 2^24 public keys, a verifier would likely only have to
-check about 8 signatures to check authentication and determine if the
-PIE and signature matches a known public key. Such an additional
-load should be acceptable with e.g. the RSA algorithm as normally
-used with a short public exponent, but might be problematic
-in the case of static-static D-H key agreement schemes, though
-those are not in common use.
-</t>
+      <figure align="center" title="PIE Examples" anchor="fig_egs">
+        <artwork align="left"><![CDATA[
+PIE-crust is as given in RFC 6920, Section 8.2.
+Hash(PIE-crust): 
+53269057 e12fe2b7 4ba07c89 2560a2d7 
+53877eb6 2ff44d5a 19002530 ed97ffe4
+
+N=24
+Indices (demimal):
+125, 70,109,199,145,128,
+190,  0,191, 41, 69,146,
+ 66, 72,196,  9, 36, 78,
+ 42, 61, 51,175, 12,117,
+
+Hash bits:085920
+
+ASCII PIE version
+:24:7d466dc79180be00bf2945924248c409244e2a3d33af0c75:085920
+Binary PIE version
+187d466dc79180be00bf2945924248c409244e2a3d33af0c75085920
+]]></artwork>
+
+      </figure>
 
 
 </section>
@@ -290,31 +302,39 @@ what might be reasonable parameters to use.
 
 </t>
 
-<section title="Identifying the Wrong Key">
+<section title="How Many Indices?">
 
-<t>
+<t>The number of indices required to efficiently determine the right key to use
+to verify a signature will depend on the size of the verifier database, i.e.,
+the number of possible signers. With 27 indices and a large verifier database
+of 2^32 public keys, a verifier would likely only have to check about 4
+signatures to check authentication and determine if the PIE and signature
+matches a known public key. Such an additional load should be acceptable with
+e.g. the RSA algorithm as normally used with a short public exponent, but might
+be problematic in the case of static-static D-H key agreement schemes, though
+those are not in common use.  </t>
 
-If we assume that the underlying hash function is strong and collision
-resistant then sending a full hash value would presumably ensure that we could
-ignore the probability of a collision, where a key identifier matches more than
-one key. Since we are only sending some key bits, it is possible that
-our 'pi' value 
+<t>For a population of 2^i keys, if we use i-j indices in our PIEs,
+then one PIE is likely to match 2^j keys, meaning that the verifier
+may have to check 2^(j-1) keys in order to do a successful signature
+verification and 2^j signature checks to determine failure.</t>
 
+<t>Note that the 27 indices is the largest number of indices that results
+in a PIE that is shorter than the underlying hash value. 
 </t>
-
 
 </section>
 
 <section title="Repeating Yourself">
 
 <t>
-Since we are only sending a subset of the hash bits,
-we do however, need to estimate how many are needed, for a given size
-of key population and a given frequency of use.
-
-[[...and that's TBD...]]
-
+Clearly, if one sends many PIEs for the just one PIE crust, 
+eventually a passive attacker could reconstruct the hash of
+the PIE crust. With a 256 bit underlying hash, and sending
+27 bits per PIE, we expose almost all of the full hash to
+that attacker very quickly. CRAP! 
 </t>
+
 
 </section>
 
@@ -384,7 +404,8 @@ create any registries or codepoints required.
 <t>
 There is an initial BSD-licensed implementation used to generate
 the examples here available at https://github.com/sftcd/pie.
-There is currently no verifier-side implementation.
+There is currently no verifier-side implementation for efficiently
+searching matching a PIE with a set of PIE-crusts.
 </t>
 
 </section>
