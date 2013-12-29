@@ -5,11 +5,11 @@ CC=g++ -g
 all: draft tool
 
 draft:
-	$(XML2RFC) draft-farrell-pi.xml draft-farrell-pi-00.txt
+	$(XML2RFC) draft-farrell-pie.xml draft-farrell-pie-00.txt
 
 tool: 
 	$(CC) pie.cc -o pie -l crypto
 
 clean:
-	rm -f   draft-farrell-pi-00.txt *~
+	rm -f   draft-farrell-pie-00.txt pie *~
 
