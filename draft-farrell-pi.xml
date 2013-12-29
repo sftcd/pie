@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC4086 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4086.xml">
+<!ENTITY RFC5652 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5652.xml">
+<!ENTITY RFC5234 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5234.xml">
+<!ENTITY RFC6920 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6920.xml">
+<!ENTITY RFC6982 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6982.xml">
+<!ENTITY I-D.farrell-perpass-attack SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.farrell-perpass-attack.xml">
+]>
+
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+
+<?rfc strict="yes" ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="4"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="yes" ?>
+<?rfc subcompact="no" ?>
+
+<rfc category="std" ipr="trust200902" submissionType="independent" docName="draft-farrell-pi-00">
+<front>
+<title abbrev="Privacy Friendly Key Identifiers">Privacy Friendly Key Identifiers</title>
+
+<author fullname="Stephen Farrell" initials="S." 
+surname="Farrell">
+<organization>Trinity College Dublin</organization>
+<address>
+<postal>
+<street></street>
+<city>Dublin</city>
+<region></region>
+<code>2</code>
+<country>Ireland</country>
+</postal>
+<phone>+353-1-896-2354</phone>
+<email>stephen.farrell@cs.tcd.ie</email>
+</address>
+</author>
+
+<date/>
+
+<area>IETF</area>
+
+<workgroup>Network Working Group</workgroup>
+<keyword>cryptographic key identifier privacy</keyword>
+
+<abstract>
+<t>
+
+This memo describes a privacy friendly form of key identifier
+that can be used in cryptographic protocols. The basic idea
+is to identify a key via a hash value and to use a randomly
+selected subset of the hash value bits as the key identifier.
+We use the term 'PIE' for such identifiers, standing for
+Privately Identified Encryption.
+
+</t>
+
+</abstract>
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t>
+[[Comments and things to change in obvious ways are in double-square
+brackets like this.]]</t>
+
+<t>
+Current digital signature and key agreement mechanisms (such as used for the
+Cryptographis Message Syntax (CMS)
+<xref target="RFC5652"/>
+), inherently involve some form of key
+identifier that allows tracking, since the key identifier normally maps 1:1 (or
+one to some small value) to a protocol identitifer such as an email address. If
+such a key identifier accompanies some ciphertext, then it can identify the
+intended recipient. If it accompanies a signature then it can identify the
+sender. If it accompanies a message authentication code (MAC) then it can
+identity both sender and recipient. 
+</t>
+
+<t>
+Such identification need not be immediate, that is, the information that
+"leaks" may not be obviously bound to an individual person at the moment
+when some packets are recorded, but may later be associated with an individual
+through other means, for example, if a destination IP address is 
+later associated with a person. Repeated use of the same key identifier
+can therefore expose some information that we might not wish to
+have exposed.
+</t>
+
+<t>
+There therefore seems to be merit to define a method for Privately Identifing
+Encryption (PIE),
+that can be used efficiently at scale, so that even a
+database of millions of keys can be efficiently searched using our
+privacy-friendly form of key identifier.
+</t>
+
+<t>
+
+The basic idea is to identify keys via values that are a hash of
+something, and to identify the key via a randomly selected set of
+bits of the hash, so that the PIE for the same key will be 
+different each time. The thing that is hashed will vary in 
+different cases, but will have to be defined for any PIE
+consuming protocol. Since PIEs however can probably be used
+in many protocols that already support opaque key 
+identifiers, so long as there is a bit somewhere to indicate
+that we are using PIEs, it should be quite feasible
+to retro-fit many protocols to become PIE-throwing protocols.
+
+</t>
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document
+are to be interpreted as described in <xref target="RFC2119"/>.  This
+specification uses the Augmented Backus-Naur Form (ABNF) notation of 
+<xref target="RFC5234"/>.  </t>
+
+</section>
+
+<section title="Making a PIE">
+
+<t>
+To start we need something to hash. For a signature, the relevant public key
+would seem appropriate and the same is true for asymmetrically encrypted
+ciphertext and key agreement messages. For symmetrically protected data, the
+value to be hashed can be agreed out of band or via some other protocol.  
+Where necessary we'll refer to the input to the hash function as the PIE-crust.
+
+</t>
+
+<t>
+In all cases, if the PIE-crust can readily be associated
+with the PIE by an adversary then the adversary wins something. So for example, 
+a PIE-crust that is a straight hash of a public key that is publicly 
+available in an accessible public key certificate might not produce as good an
+improvement in privacy as can be achieved. Nonetheless, it may be
+that in some situations, even a knowable PIE-crust might not be
+fatal, but PIE-throwing protocols will need to analyse this aspect.
+</t>
+
+<t>
+Given a good hash function, each bit of hash output can be referenced via an
+index and a randomly selected set of those indices, together with the
+associated hash output bits constitutes the PIE. An easy enough recipe!
+Note that 
+a PIE might match more than one PIE-crust, but that is acceptable 
+since the purpose of the PIE is to help avoid tracking based on 
+PIE-crust values or equivalents and even with quite few random
+hash bits in the PIE, it is very likely that only very few 
+PIE-crusts match the PIE.
+</t>
+
+<t>
+With this scheme a 3rd party watching just the PIE-throwing protocol appears not to be able to
+easily correlate signatures with accounts unless it also has relevant records
+from e.g. a verifier database or can watch (or trigger) the relevant protocol a
+very large number of times, or can watch other protocols that might expose
+the PIE-crust. Note that that last situation should also be considered 
+for PIE-throwing protocols. <xref target="I-D.farrell-perpass-attack"/>
+
+</t>
+
+</section>
+
+<section title="Formats">
+
+<t>
+A PIE is formed from an identiifer for the hash function, the
+number of indices to be used, a set of (randomly selected) indices, and a set
+of hash value bits.  We define two formats for PIEs - an ASCII format and
+a binary format.
+</t>
+
+<section title="ASCII Format">
+
+<t>
+<xref target="fig_ascii"/> provides the ABNF for the ASCII format PIE.
+</t>
+
+
+        <figure title="PIE ASCII Format" anchor="fig_ascii">
+        <artwork type="abnf" align="center">
+
+PIE = [ alg ] ":" nindices ":" indices ":" bits
+alg = 1*2DIGIT
+nindices = 1*3DIGIT
+indices = unreserved
+bits = unreserved
+
+        </artwork>
+        </figure>
+
+<t>
+The fields in an ASCII PIE are:
+<list style="symbols">
+<t>alg: specifies the hash function used, 0 meaning sha-256, and with
+0 as the default.</t>
+<t>nindices: specifies how many index bits are present, a value between
+1 and 128 (but useful values are likely between 16 and 24). 
+nindices MUST be a multiple of 4 for a precisely equivalent binary PIE
+to be mappable to this ASCII PIE.</t>
+<t>indices: is a catenation of 3 character values, each representing
+an index values, e.g. "001067" would represent two indices, the first
+being position 1 (the 2nd most significant bit) and the second 
+being the 67th bit of the hash value.</t>
+<t>bits: an ASCII-HEX encoding of the values found at the relevant indices of the hash value.
+If nindices is not a multiple of 4, then additional bits are 
+added to the right. Those padding bits SHOULD be random.
+</t>
+</list>
+</t>
+
+</section>
+
+<section title="Binary Format">
+<t>
+<xref target="fig_bin"/> describes the binary format PIE.
+</t>
+
+      <figure align="center" title="PIE Binary Format" anchor="fig_bin">
+
+        <artwork align="left"><![CDATA[
+0123456701234567012345670123456701234567012345670123456701234567
++--+----+--------------------...+---------------------------...+
+|A |  N |...4*N 1byte indices...| ... 4*N indexed-hash bits ...|
++--+----+--------------------...+---------------------------...+
+]]></artwork>
+
+      </figure>
+
+<t>
+The fields in a binary format PIE are as in the ascii format
+but with some restrictions:
+<list style="symbols">
+<t>alg: a 3-bit value specifying the hash function used, 0 meaning sha-256</t>
+<t>nindices: a 5-bit value specifies how many index bits are present, a value between
+1 and 15 (but useful values are likely between 4 and 6). There are
+4 times as many indices present as represented here in order to
+ensure that the entire binary PIE requires no padding.</t>
+<t>indices: is a catenation of 1 octet values, each representing
+an index value, e.g. "0143"H would represent two indices, the first
+being position 1 (the 2nd most significant bit) and the second 
+being the 67th bit of the hash value.</t>
+<t>bits: the values found at the relevant indices of the hash value.
+If N is not a multiple of 8, then an additional 4 bits of
+padding are to be added as the rightmost bits of this field.
+Those padding bits SHOULD be random.
+</t>
+</list>
+</t>
+
+</section>
+
+<section title="Examples">
+
+<t>In this section we re-use the example values from Section 8.2 of
+<xref target="RFC6920"/>, so we are using SHA-256 with the PIE-crust
+being the subject public key information used in that example.</t>
+
+<t>The number of indices required
+to efficiently determine the right key to use to verify a signature
+will depend on the size of the verifier
+database, i.e., the number of possible signers. With 20 indices 
+and a large verifier database of 2^24 public keys, a verifier would likely only have to
+check about 8 signatures to check authentication and determine if the
+PIE and signature matches a known public key. Such an additional
+load should be acceptable with e.g. the RSA algorithm as normally
+used with a short public exponent, but might be problematic
+in the case of static-static D-H key agreement schemes, though
+those are not in common use.
+</t>
+
+
+</section>
+
+</section>
+
+<section title="Analysis">
+
+<t>
+
+In this section, we consider the strengths and weaknesses of this scheme and
+what might be reasonable parameters to use.
+
+</t>
+
+<section title="Identifying the Wrong Key">
+
+<t>
+
+If we assume that the underlying hash function is strong and collision
+resistant then sending a full hash value would presumably ensure that we could
+ignore the probability of a collision, where a key identifier matches more than
+one key. Since we are only sending some key bits, it is possible that
+our 'pi' value 
+
+</t>
+
+
+</section>
+
+<section title="Repeating Yourself">
+
+<t>
+Since we are only sending a subset of the hash bits,
+we do however, need to estimate how many are needed, for a given size
+of key population and a given frequency of use.
+
+[[...and that's TBD...]]
+
+</t>
+
+</section>
+
+<section title="Bad Guy Knows Hash Input">
+
+<t>
+
+[[TBD - examples of how it might happen and impact.]]
+
+</t>
+
+</section>
+
+<section title="Seeing Many Protocols Runs">
+
+<t>
+[[TBD - how many times does the bad guy need to see this
+to win?]]
+
+</t>
+
+</section>
+
+</section>
+
+<section title="IANA Considerations">
+
+<t>
+This memo defines an abstract scheme that is not used by any protocol at
+present. Were it to be used, then the protocol making use of the scheme should
+create any registries or codepoints required.
+
+</t>
+
+</section>
+
+<section title="Implementation Status">
+
+<t>[[Note to RFC editor - please delete this section before publication.]]</t>
+
+<t>
+    This section records the status of known implementations of the
+      protocol defined by this specification at the time of posting of
+      this Internet-Draft, and is based on a proposal described in 
+      <xref target="RFC6982"/>.  The description
+      of implementations in this section is intended to assist the IETF
+      in its decision processes in progressing drafts to RFCs.  Please
+      note that the listing of any individual implementation here does
+      not imply endorsement by the IETF.  Furthermore, no effort has
+      been spent to verify the information presented here that was
+      supplied by IETF contributors.  This is not intended as, and must
+      not be construed to be, a catalog of available implementations or
+      their features.  Readers are advised to note that other
+      implementations may exist.
+</t>
+<t>
+      According to 
+      <xref target="RFC6982"/>
+      "this will allow reviewers and working groups to assign
+      due consideration to documents that have the benefit of running
+      code, by considering the running code as evidence of valuable
+      experimentation and feedback that has made the implemented
+      protocols more mature.  It is up to the individual working groups
+      to use this information as they see fit".
+</t>
+
+<t>
+There is an initial BSD-licensed implementation used to generate
+the examples here available at https://github.com/sftcd/pie.
+There is currently no verifier-side implementation.
+</t>
+
+</section>
+
+<section title="Security Considerations">
+
+<t>
+
+This memo is all about security so most has been said. However,
+implementations, particularly on constrained devices need to take a lot of care
+with random number generation and seeding pseudo random number generators as
+the security of the scheme could be completely undermined by use of predictable
+sequences of key identifier values. <xref target="RFC4086"/> provides guidance
+on ways in which pseudo-randomn numbers can be generated.
+
+</t>
+
+</section>
+
+<section title="Implementation Considerations">
+
+<t>
+[[TBD - write code then try Yaron's idea.]]
+</t>
+
+</section>
+
+<section title="Acknowledgements">
+
+<t>
+Thanks to the following folks who provided comments:
+
+[[whoever's interested, if any]]
+
+</t>
+
+</section>
+
+</middle>
+
+<back>
+
+<references title="Normative References">
+&RFC2119;
+&RFC5234;
+</references>
+
+<references title="Informative References">
+&RFC4086;
+&RFC5652;
+&RFC6920;
+&RFC6982;
+&I-D.farrell-perpass-attack;
+</references>
+
+</back>
+
+</rfc>
