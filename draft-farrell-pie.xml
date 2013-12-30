@@ -329,10 +329,11 @@ in a PIE that is shorter than the underlying hash value.
 
 <t>
 Clearly, if one sends many PIEs for the just one PIE crust, 
-eventually a passive attacker could reconstruct the hash of
+eventually a passive attacker who sees and can 
+distinguish the source of all of those could reconstruct the hash of
 the PIE crust. With a 256 bit underlying hash, and sending
-27 bits per PIE, we expose almost all of the full hash to
-that attacker very quickly. CRAP! 
+16 bits per PIE, we expose almost all of the full hash to
+that attacker very quickly. 
 </t>
 
 
@@ -421,14 +422,6 @@ the security of the scheme could be completely undermined by use of predictable
 sequences of key identifier values. <xref target="RFC4086"/> provides guidance
 on ways in which pseudo-randomn numbers can be generated.
 
-</t>
-
-</section>
-
-<section title="Implementation Considerations">
-
-<t>
-[[TBD - write code then try Yaron's idea.]]
 </t>
 
 </section>
