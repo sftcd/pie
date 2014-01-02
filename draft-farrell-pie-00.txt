@@ -3,8 +3,8 @@
 
 Network Working Group                                         S. Farrell
 Internet-Draft                                    Trinity College Dublin
-Intended status: Standards Track                       December 29, 2013
-Expires: July 2, 2014
+Intended status: Experimental                            January 2, 2014
+Expires: July 6, 2014
 
 
                     Privacy Friendly Key Identifiers
@@ -13,9 +13,9 @@ Expires: July 2, 2014
 Abstract
 
    This memo describes a privacy friendly form of key identifier that
-   can be used in cryptographic protocols.  The basic idea is to
-   identify a key via a hash value and to use a randomly selected subset
-   of the hash value bits as the key identifier.  We use the term 'PIE'
+   can be used in cryptographic protocols.  We identify a key via a hash
+   value but over-the-wire send that value XORed with a randomly
+   selected set of bits as the key identifier.  We use the term 'PIE'
    for such identifiers, standing for Privately Identified Encryption.
 
 Status of this Memo
@@ -33,11 +33,11 @@ Status of this Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on July 2, 2014.
+   This Internet-Draft will expire on July 6, 2014.
 
 Copyright Notice
 
-   Copyright (c) 2013 IETF Trust and the persons identified as the
+   Copyright (c) 2014 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -52,33 +52,28 @@ Copyright Notice
 
 
 
-Farrell                   Expires July 2, 2014                  [Page 1]
+Farrell                   Expires July 6, 2014                  [Page 1]
 
-Internet-Draft      Privacy Friendly Key Identifiers       December 2013
+Internet-Draft      Privacy Friendly Key Identifiers        January 2014
 
 
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . . . 3
-   2.  Making a PIE  . . . . . . . . . . . . . . . . . . . . . . . . . 3
-   3.  Formats . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
-     3.1.  ASCII Format  . . . . . . . . . . . . . . . . . . . . . . . 4
-     3.2.  Binary Format . . . . . . . . . . . . . . . . . . . . . . . 5
-     3.3.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . 6
-   4.  Analysis  . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
-     4.1.  How Many Indices? . . . . . . . . . . . . . . . . . . . . . 7
-     4.2.  Repeating Yourself  . . . . . . . . . . . . . . . . . . . . 7
-     4.3.  Bad Guy Knows Hash Input  . . . . . . . . . . . . . . . . . 7
-     4.4.  Seeing Many Protocols Runs  . . . . . . . . . . . . . . . . 7
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . . . 7
-   6.  Implementation Status . . . . . . . . . . . . . . . . . . . . . 7
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . . . 8
-   8.  Implementation Considerations . . . . . . . . . . . . . . . . . 8
-   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . 8
-   10. References  . . . . . . . . . . . . . . . . . . . . . . . . . . 9
-     10.1. Normative References  . . . . . . . . . . . . . . . . . . . 9
-     10.2. Informative References  . . . . . . . . . . . . . . . . . . 9
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . . . 9
+   2.  Making a PIE  . . . . . . . . . . . . . . . . . . . . . . . . . 4
+   3.  Formating . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+   4.  Analysis  . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+     4.1.  What Hamming Distance?  . . . . . . . . . . . . . . . . . . 5
+     4.2.  Repeating Yourself  . . . . . . . . . . . . . . . . . . . . 5
+     4.3.  Bad Guy Knows Hash Input  . . . . . . . . . . . . . . . . . 5
+     4.4.  Seeing Many Protocols Runs  . . . . . . . . . . . . . . . . 6
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . . . 6
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . . . 6
+   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . 6
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . . . 6
+     8.2.  Informative References  . . . . . . . . . . . . . . . . . . 6
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . . . 7
 
 
 
@@ -108,9 +103,14 @@ Table of Contents
 
 
 
-Farrell                   Expires July 2, 2014                  [Page 2]
+
+
+
+
+
+Farrell                   Expires July 6, 2014                  [Page 2]
 
-Internet-Draft      Privacy Friendly Key Identifiers       December 2013
+Internet-Draft      Privacy Friendly Key Identifiers        January 2014
 
 
 1.  Introduction
@@ -119,7 +119,7 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    brackets like this.]]
 
    Current digital signature and key agreement mechanisms (such as used
-   for the Cryptographis Message Syntax (CMS) [RFC5652] ), inherently
+   for the Cryptographis Message Syntax (CMS) [RFC5652], inherently
    involve some form of key identifier that allows tracking, since the
    key identifier normally maps 1:1 (or one to some small value) to a
    protocol identitifer such as an email address.  If such a key
@@ -136,20 +136,22 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    use of the same key identifier can therefore expose some information
    that we might not wish to have exposed.
 
-   There therefore seems to be merit to define a method for Privately
+   And since cryptographically assured confidentiality and data origin
+   authentication are the basis for many higher level security services
+   there therefore seems to be merit to define a method for Privately
    Identifing Encryption (PIE), that can be used efficiently at scale,
    so that even a database of millions of keys can be efficiently
    searched using our privacy-friendly form of key identifier.
 
    The basic idea is to identify keys via values that are a hash of
-   something, and to identify the key via a randomly selected set of
-   bits of the hash, so that the PIE for the same key will be different
-   each time.  The thing that is hashed will vary in different cases,
-   but will have to be defined for any PIE consuming protocol.  Since
-   PIEs however can probably be used in many protocols that already
-   support opaque key identifiers, so long as there is a bit somewhere
-   to indicate that we are using PIEs, it should be quite feasible to
-   retro-fit many protocols to become PIE-throwing protocols.
+   something, XORed with a randomly selected set of bits, so that the
+   PIE for the same key will be different each time.  The thing that is
+   hashed will vary in different cases, but will have to be defined for
+   any PIE consuming protocol.  Since PIEs however can probably be used
+   in many protocols that already support opaque key identifiers, so
+   long as there is a bit somewhere to indicate that we are using PIEs,
+   it should be quite feasible to retro-fit many protocols to become
+   PIE-throwing protocols.
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -158,22 +160,30 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    [RFC5234].
 
 
+
+
+
+
+Farrell                   Expires July 6, 2014                  [Page 3]
+
+Internet-Draft      Privacy Friendly Key Identifiers        January 2014
+
+
 2.  Making a PIE
 
    To start we need something to hash.  For a signature, the relevant
-
-
-
-Farrell                   Expires July 2, 2014                  [Page 3]
-
-Internet-Draft      Privacy Friendly Key Identifiers       December 2013
-
-
    public key would seem appropriate and the same is true for
    asymmetrically encrypted ciphertext and key agreement messages.  For
    symmetrically protected data, the value to be hashed can be agreed
    out of band or via some other protocol.  Where necessary we'll refer
    to the input to the hash function as the PIE-crust.
+
+   And stretching the analogy, we'll refer the the value XORed with the
+   hash of the PIE-crust, as the PIE-filling.  So we therefore have:
+
+                  PIE ::== Hash(PIE-crust) XOR PIE-filling
+
+                        Figure 1: PIE construstion
 
    In all cases, if the PIE-crust can readily be associated with the PIE
    by an adversary then the adversary wins something.  So for example, a
@@ -184,13 +194,10 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    not be fatal, but PIE-throwing protocols will need to analyse this
    aspect.
 
-   Given a good hash function, each bit of hash output can be referenced
-   via an index and a randomly selected set of those indices, together
-   with the associated hash output bits constitutes the PIE.  An easy
-   enough recipe!  Note that a PIE might match more than one PIE-crust,
-   but that is acceptable since the purpose of the PIE is to help avoid
-   tracking based on PIE-crust values or equivalents and even with quite
-   few random hash bits in the PIE, it is very likely that only very few
+   Note that a PIE might match more than one PIE-crust, but that is
+   acceptable since the purpose of the PIE is to help avoid tracking
+   based on PIE-crust values or equivalents and even with quite few
+   random hash bits in the PIE, it is very likely that only very few
    PIE-crusts match the PIE.
 
    With this scheme a 3rd party watching just the PIE-throwing protocol
@@ -202,127 +209,24 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    throwing protocols.  [I-D.farrell-perpass-attack]
 
 
-3.  Formats
+3.  Formating
 
-   A PIE is formed from an identiifer for the hash function, the number
-   of indices to be used, a set of (randomly selected) indices, and a
-   set of hash value bits.  We define two formats for PIEs - an ASCII
-   format and a binary format.
-
-3.1.  ASCII Format
-
-   Figure 1 provides the ABNF for the ASCII format PIE.
+   A PIE does not require a new format.  Instead, we require that both
+   peers in a communication need to be aware that PIEs are being used
+   instead of traditional key identifiers.  If a PIE-throwing protocol
+   requires differentiation between traditional key identifiers and
+   PIEs, then that protocol needs to signal that difference in some
+   sensible way.  Otherwise, PIEs are essentially bit strings that can
 
 
 
-
-
-
-
-
-Farrell                   Expires July 2, 2014                  [Page 4]
+Farrell                   Expires July 6, 2014                  [Page 4]
 
-Internet-Draft      Privacy Friendly Key Identifiers       December 2013
+Internet-Draft      Privacy Friendly Key Identifiers        January 2014
 
 
-              PIE = [ alg ] ":" nindices ":" indices ":" bits
-              alg = 1*2DIGIT
-              nindices = 1*3DIGIT
-              indices = unreserved
-              bits = unreserved
-
-
-                        Figure 1: PIE ASCII Format
-
-   The fields in an ASCII PIE are:
-
-   o  alg: specifies the hash function used, 0 meaning sha-256, and with
-      0 as the default.
-
-   o  nindices: specifies how many index bits are present, a value
-      between 1 and 128 (but useful values are likely between 16 and
-      24). nindices MUST be a multiple of 4 for a precisely equivalent
-      binary PIE to be mappable to this ASCII PIE.
-
-   o  indices: is a catenation of 3 character values, each representing
-      an index values, e.g. "001067" would represent two indices, the
-      first being position 1 (the 2nd most significant bit) and the
-      second being the 67th bit of the hash value.
-
-   o  bits: an ASCII-HEX encoding of the values found at the relevant
-      indices of the hash value.  If nindices is not a multiple of 4,
-      then additional bits are added to the right.  Those padding bits
-      SHOULD be random.
-
-3.2.  Binary Format
-
-   Figure 2 describes the binary format PIE.
-
-   0123456701234567012345670123456701234567012345670123456701234567
-   +--+----+--------------------...+---------------------------...+
-   |A |  N |...4*N 1byte indices...| ... 4*N indexed-hash bits ...|
-   +--+----+--------------------...+---------------------------...+
-
-                        Figure 2: PIE Binary Format
-
-   The fields in a binary format PIE are as in the ascii format but with
-   some restrictions:
-
-   o  alg: a 3-bit value specifying the hash function used, 0 meaning
-      sha-256
-
-   o  nindices: a 5-bit value specifies how many index bits are present,
-      a value between 1 and 15 (but useful values are likely between 4
-
-
-
-Farrell                   Expires July 2, 2014                  [Page 5]
-
-Internet-Draft      Privacy Friendly Key Identifiers       December 2013
-
-
-      and 6).  There are 4 times as many indices present as represented
-      here in order to ensure that the entire binary PIE requires no
-      padding.
-
-   o  indices: is a catenation of 1 octet values, each representing an
-      index value, e.g. "0143"H would represent two indices, the first
-      being position 1 (the 2nd most significant bit) and the second
-      being the 67th bit of the hash value.
-
-   o  bits: the values found at the relevant indices of the hash value.
-      If N is not a multiple of 8, then an additional 4 bits of padding
-      are to be added as the rightmost bits of this field.  Those
-      padding bits SHOULD be random.
-
-3.3.  Examples
-
-   In this section we re-use the example values from Section 8.2 of
-   [RFC6920], so we are using SHA-256 with the PIE-crust being the
-   subject public key information used in that example.  Figure 3 shows
-   both ASCII and Binary format PIEs for this PIE-crust with 24 indices
-   used.
-
-   PIE-crust is as given in RFC 6920, Section 8.2.
-   Hash(PIE-crust):
-   53269057 e12fe2b7 4ba07c89 2560a2d7
-   53877eb6 2ff44d5a 19002530 ed97ffe4
-
-   N=24
-   Indices (demimal):
-   125, 70,109,199,145,128,
-   190,  0,191, 41, 69,146,
-    66, 72,196,  9, 36, 78,
-    42, 61, 51,175, 12,117,
-
-   Hash bits:085920
-
-   ASCII PIE version
-   :24:7d466dc79180be00bf2945924248c409244e2a3d33af0c75:085920
-   Binary PIE version
-   187d466dc79180be00bf2945924248c409244e2a3d33af0c75085920
-
-                          Figure 3: PIE Examples
+   be encoded in all of the various ways that other key identifiers have
+   been in various protocols.
 
 
 4.  Analysis
@@ -330,25 +234,21 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    In this section, we consider the strengths and weaknesses of this
    scheme and what might be reasonable parameters to use.
 
+4.1.  What Hamming Distance?
 
+   The number of non-zero bits in the PIE-filling that allow for
+   efficient verification of a signature will depend on the size of the
+   verifier database, i.e., the number of possible signers.
 
-Farrell                   Expires July 2, 2014                  [Page 6]
-
-Internet-Draft      Privacy Friendly Key Identifiers       December 2013
+   GOT HERE; OLD TEXT BELOW
 
-
-4.1.  How Many Indices?
-
-   The number of indices required to efficiently determine the right key
-   to use to verify a signature will depend on the size of the verifier
-   database, i.e., the number of possible signers.  With 27 indices and
-   a large verifier database of 2^32 public keys, a verifier would
-   likely only have to check about 4 signatures to check authentication
-   and determine if the PIE and signature matches a known public key.
-   Such an additional load should be acceptable with e.g. the RSA
-   algorithm as normally used with a short public exponent, but might be
-   problematic in the case of static-static D-H key agreement schemes,
-   though those are not in common use.
+   With 27 indices and a large verifier database of 2^32 public keys, a
+   verifier would likely only have to check about 4 signatures to check
+   authentication and determine if the PIE and signature matches a known
+   public key.  Such an additional load should be acceptable with e.g.
+   the RSA algorithm as normally used with a short public exponent, but
+   might be problematic in the case of static-static D-H key agreement
+   schemes, though those are not in common use.
 
    For a population of 2^i keys, if we use i-j indices in our PIEs, then
    one PIE is likely to match 2^j keys, meaning that the verifier may
@@ -361,14 +261,25 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
 4.2.  Repeating Yourself
 
    Clearly, if one sends many PIEs for the just one PIE crust,
-   eventually a passive attacker could reconstruct the hash of the PIE
-   crust.  With a 256 bit underlying hash, and sending 27 bits per PIE,
-   we expose almost all of the full hash to that attacker very quickly.
-   CRAP!
+   eventually a passive attacker who sees and can distinguish the source
+   of all of those could reconstruct the hash of the PIE crust.  With a
+   256 bit underlying hash, and sending 16 bits per PIE, we expose
+   almost all of the full hash to that attacker very quickly.
 
 4.3.  Bad Guy Knows Hash Input
 
    [[TBD - examples of how it might happen and impact.]]
+
+
+
+
+
+
+
+Farrell                   Expires July 6, 2014                  [Page 5]
+
+Internet-Draft      Privacy Friendly Key Identifiers        January 2014
+
 
 4.4.  Seeing Many Protocols Runs
 
@@ -382,46 +293,7 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    scheme should create any registries or codepoints required.
 
 
-6.  Implementation Status
-
-   [[Note to RFC editor - please delete this section before
-
-
-
-Farrell                   Expires July 2, 2014                  [Page 7]
-
-Internet-Draft      Privacy Friendly Key Identifiers       December 2013
-
-
-   publication.]]
-
-   This section records the status of known implementations of the
-   protocol defined by this specification at the time of posting of this
-   Internet-Draft, and is based on a proposal described in [RFC6982].
-   The description of implementations in this section is intended to
-   assist the IETF in its decision processes in progressing drafts to
-   RFCs.  Please note that the listing of any individual implementation
-   here does not imply endorsement by the IETF.  Furthermore, no effort
-   has been spent to verify the information presented here that was
-   supplied by IETF contributors.  This is not intended as, and must not
-   be construed to be, a catalog of available implementations or their
-   features.  Readers are advised to note that other implementations may
-   exist.
-
-   According to [RFC6982] "this will allow reviewers and working groups
-   to assign due consideration to documents that have the benefit of
-   running code, by considering the running code as evidence of valuable
-   experimentation and feedback that has made the implemented protocols
-   more mature.  It is up to the individual working groups to use this
-   information as they see fit".
-
-   There is an initial BSD-licensed implementation used to generate the
-   examples here available at https://github.com/sftcd/pie.  There is
-   currently no verifier-side implementation for efficiently searching
-   matching a PIE with a set of PIE-crusts.
-
-
-7.  Security Considerations
+6.  Security Considerations
 
    This memo is all about security so most has been said.  However,
    implementations, particularly on constrained devices need to take a
@@ -432,26 +304,15 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    can be generated.
 
 
-8.  Implementation Considerations
-
-   [[TBD - write code then try Yaron's idea.]]
-
-
-9.  Acknowledgements
+7.  Acknowledgements
 
    Thanks to the following folks who provided comments: [[whoever's
    interested, if any]]
 
 
+8.  References
 
-Farrell                   Expires July 2, 2014                  [Page 8]
-
-Internet-Draft      Privacy Friendly Key Identifiers       December 2013
-
-
-10.  References
-
-10.1.  Normative References
+8.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -459,7 +320,7 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    [RFC5234]  Crocker, D. and P. Overell, "Augmented BNF for Syntax
               Specifications: ABNF", STD 68, RFC 5234, January 2008.
 
-10.2.  Informative References
+8.2.  Informative References
 
    [I-D.farrell-perpass-attack]
               Farrell, S. and H. Tschofenig, "Pervasive Monitoring is an
@@ -469,16 +330,15 @@ Internet-Draft      Privacy Friendly Key Identifiers       December 2013
    [RFC4086]  Eastlake, D., Schiller, J., and S. Crocker, "Randomness
               Requirements for Security", BCP 106, RFC 4086, June 2005.
 
+
+
+Farrell                   Expires July 6, 2014                  [Page 6]
+
+Internet-Draft      Privacy Friendly Key Identifiers        January 2014
+
+
    [RFC5652]  Housley, R., "Cryptographic Message Syntax (CMS)", STD 70,
               RFC 5652, September 2009.
-
-   [RFC6920]  Farrell, S., Kutscher, D., Dannewitz, C., Ohlman, B.,
-              Keranen, A., and P. Hallam-Baker, "Naming Things with
-              Hashes", RFC 6920, April 2013.
-
-   [RFC6982]  Sheffer, Y. and A. Farrel, "Improving Awareness of Running
-              Code: The Implementation Status Section", RFC 6982,
-              July 2013.
 
 
 Author's Address
@@ -500,5 +360,33 @@ Author's Address
 
 
 
-Farrell                   Expires July 2, 2014                  [Page 9]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Farrell                   Expires July 6, 2014                  [Page 7]
 
