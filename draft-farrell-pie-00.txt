@@ -64,16 +64,16 @@ Table of Contents
    3.  Formating . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
    4.  Analysis  . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
      4.1.  What Hamming Distance?  . . . . . . . . . . . . . . . . . . 5
-     4.2.  Repeating Yourself  . . . . . . . . . . . . . . . . . . . . 5
-     4.3.  Bad Guy Knows Hash Input  . . . . . . . . . . . . . . . . . 5
-     4.4.  Seeing Many Protocols Runs  . . . . . . . . . . . . . . . . 6
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . . . 6
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . . . 6
-   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . 6
+     4.2.  Seeing Many Protocols Runs  . . . . . . . . . . . . . . . . 5
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . . . 5
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . . . 5
+   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . 5
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . . . 6
      8.1.  Normative References  . . . . . . . . . . . . . . . . . . . 6
      8.2.  Informative References  . . . . . . . . . . . . . . . . . . 6
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . . . 7
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . . . 6
+
+
 
 
 
@@ -116,7 +116,8 @@ Internet-Draft      Privacy Friendly Key Identifiers        January 2014
 1.  Introduction
 
    [[Comments and things to change in obvious ways are in double-square
-   brackets like this.]]
+   brackets like this.  In particular, note that this scheme is not yet
+   serious - its just an idea that may well turn out to be crap.]]
 
    Current digital signature and key agreement mechanisms (such as used
    for the Cryptographis Message Syntax (CMS) [RFC5652], inherently
@@ -158,7 +159,6 @@ Internet-Draft      Privacy Friendly Key Identifiers        January 2014
    document are to be interpreted as described in [RFC2119].  This
    specification uses the Augmented Backus-Naur Form (ABNF) notation of
    [RFC5234].
-
 
 
 
@@ -240,48 +240,7 @@ Internet-Draft      Privacy Friendly Key Identifiers        January 2014
    efficient verification of a signature will depend on the size of the
    verifier database, i.e., the number of possible signers.
 
-   GOT HERE; OLD TEXT BELOW
-
-   With 27 indices and a large verifier database of 2^32 public keys, a
-   verifier would likely only have to check about 4 signatures to check
-   authentication and determine if the PIE and signature matches a known
-   public key.  Such an additional load should be acceptable with e.g.
-   the RSA algorithm as normally used with a short public exponent, but
-   might be problematic in the case of static-static D-H key agreement
-   schemes, though those are not in common use.
-
-   For a population of 2^i keys, if we use i-j indices in our PIEs, then
-   one PIE is likely to match 2^j keys, meaning that the verifier may
-   have to check 2^(j-1) keys in order to do a successful signature
-   verification and 2^j signature checks to determine failure.
-
-   Note that the 27 indices is the largest number of indices that
-   results in a PIE that is shorter than the underlying hash value.
-
-4.2.  Repeating Yourself
-
-   Clearly, if one sends many PIEs for the just one PIE crust,
-   eventually a passive attacker who sees and can distinguish the source
-   of all of those could reconstruct the hash of the PIE crust.  With a
-   256 bit underlying hash, and sending 16 bits per PIE, we expose
-   almost all of the full hash to that attacker very quickly.
-
-4.3.  Bad Guy Knows Hash Input
-
-   [[TBD - examples of how it might happen and impact.]]
-
-
-
-
-
-
-
-Farrell                   Expires July 6, 2014                  [Page 5]
-
-Internet-Draft      Privacy Friendly Key Identifiers        January 2014
-
-
-4.4.  Seeing Many Protocols Runs
+4.2.  Seeing Many Protocols Runs
 
    [[TBD - how many times does the bad guy need to see this to win?]]
 
@@ -312,6 +271,16 @@ Internet-Draft      Privacy Friendly Key Identifiers        January 2014
 
 8.  References
 
+
+
+
+
+
+Farrell                   Expires July 6, 2014                  [Page 5]
+
+Internet-Draft      Privacy Friendly Key Identifiers        January 2014
+
+
 8.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
@@ -329,13 +298,6 @@ Internet-Draft      Privacy Friendly Key Identifiers        January 2014
 
    [RFC4086]  Eastlake, D., Schiller, J., and S. Crocker, "Randomness
               Requirements for Security", BCP 106, RFC 4086, June 2005.
-
-
-
-Farrell                   Expires July 6, 2014                  [Page 6]
-
-Internet-Draft      Privacy Friendly Key Identifiers        January 2014
-
 
    [RFC5652]  Housley, R., "Cryptographic Message Syntax (CMS)", STD 70,
               RFC 5652, September 2009.
@@ -370,23 +332,5 @@ Author's Address
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Farrell                   Expires July 6, 2014                  [Page 7]
+Farrell                   Expires July 6, 2014                  [Page 6]
 

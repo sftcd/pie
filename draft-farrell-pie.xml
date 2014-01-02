@@ -66,7 +66,8 @@ Privately Identified Encryption.
 
 <t>
 [[Comments and things to change in obvious ways are in double-square
-brackets like this.]]</t>
+brackets like this. In particular, note that this scheme is not yet
+serious - its just an idea that may well turn out to be crap.]]</t>
 
 <t>
 Current digital signature and key agreement mechanisms (such as used for the
@@ -215,6 +216,7 @@ of a signature will depend on the size of the verifier database, i.e.,
 the number of possible signers. 
 </t>
 
+<!--
 <t>
 GOT HERE; OLD TEXT BELOW
 </t>
@@ -236,8 +238,11 @@ verification and 2^j signature checks to determine failure.</t>
 <t>Note that the 27 indices is the largest number of indices that results
 in a PIE that is shorter than the underlying hash value. 
 </t>
+-->
 
 </section>
+
+<!--
 
 <section title="Repeating Yourself">
 
@@ -251,6 +256,7 @@ that attacker very quickly.
 </t>
 
 
+
 </section>
 
 <section title="Bad Guy Knows Hash Input">
@@ -262,6 +268,7 @@ that attacker very quickly.
 </t>
 
 </section>
+-->
 
 <section title="Seeing Many Protocols Runs">
 
